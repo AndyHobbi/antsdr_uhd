@@ -1,0 +1,35 @@
+name: Build FSBL for ANTSDR E200
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-fsbl-e200:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ARM toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-arm-none-eabi make
+
+      # Сборка FSBL для E200
+      - name: Build FSBL (E200)
+        run: |
+          cd lib/sw_apps/zynq_fsbl/src
+          make clean || true
+          make BOARD=E200
+
+      - name: List output
+        run: |
+          ls -lh lib/sw_apps/zynq_fsbl/src/*.elf || true
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: fsbl-elf-e200
+          path: lib/sw_apps/zynq_fsbl/src/*.elf
