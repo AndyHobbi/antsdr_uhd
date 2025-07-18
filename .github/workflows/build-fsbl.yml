@@ -11,22 +11,25 @@ jobs:
     env:
       TARGET: e200
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+- name: Checkout repository
+  uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y gcc-arm-none-eabi build-essential dfu-util u-boot-tools device-tree-compiler bc python3 python3-pip cpio zip unzip rsync wget
+- name: Install dependencies
+  run: |
+    sudo apt-get update
+    sudo apt-get install -y gcc-arm-none-eabi make python3 python3-pip cpio zip unzip rsync wget
 
-      - name: Build FSBL for E200
-        run: make -C antsdr_e200/sw_apps/zynq_fsbl
+- name: Build FSBL for E200
+  run: |
+    cd firmware/antsdr_e200/fsbl
+    make
 
-      - name: List FSBL artifacts
-        run: ls -lh antsdr_e200/sw_apps/zynq_fsbl/*.elf || true
+- name: List FSBL artifacts
+  run: ls -lh firmware/antsdr_e200/fsbl/*.elf || true
 
-      - name: Upload FSBL artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: fsbl-elf-e200
-          path: antsdr_e200/sw_apps/zynq_fsbl/*.elf
+- name: Upload FSBL artifact
+  uses: actions/upload-artifact@v4
+  with:
+    name: fsbl-elf-e200
+    path: firmware/antsdr_e200/fsbl/*.elf
+
