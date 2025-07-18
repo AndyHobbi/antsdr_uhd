@@ -6,30 +6,30 @@ on:
     branches: [ main ]
 
 jobs:
-  build-fsbl-e200:
+  build-e200:
     runs-on: ubuntu-latest
+    env:
+      TARGET: e200
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install ARM toolchain
+      - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y gcc-arm-none-eabi make
+          sudo apt-get install -y gcc-arm-none-eabi build-essential dfu-util u-boot-tools device-tree-compiler bc python cpio zip unzip rsync wget
 
-      # Сборка FSBL для E200
-      - name: Build FSBL (E200)
-        run: |
-          cd lib/sw_apps/zynq_fsbl/src
-          make clean || true
-          make BOARD=E200
+      - name: Setup CROSS_COMPILE
+        run: echo "::add-path::$(which arm-linux-gnueabihf-gcc | sed 's:/bin/gcc::')"
 
-      - name: List output
-        run: |
-          ls -lh lib/sw_apps/zynq_fsbl/src/*.elf || true
+      - name: Build firmware
+        run: make
 
-      - name: Upload artifact
+      - name: List build artifacts
+        run: ls -lh build/
+
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: fsbl-elf-e200
-          path: lib/sw_apps/zynq_fsbl/src/*.elf
+          name: e200-build
+          path: build/*
